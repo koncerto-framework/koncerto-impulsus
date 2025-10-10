@@ -1,0 +1,95 @@
+/**
+ * KoncertoController
+ * Connect html element to JavaScript
+ *
+ * @param {Node} element
+ */
+function KoncertoController(element)
+{
+    var targets = {};
+    element.querySelectorAll('[data-target]').forEach(function (target) {
+        targets[target.getAttribute('data-target')] = target;
+    });
+    element.setAttribute('data-bind', 'true');
+
+    var controllerName = new String(element.getAttribute('data-controller')).toLowerCase();
+    if (controllerName in KoncertoImpulsus.controllers) {
+        setTimeout(function() {
+            element.controller.default = KoncertoImpulsus.controllers[controllerName];
+            element.controller.default(element.controller);
+        }, 100);
+    } else {
+        var currentPath = new String(location.href);
+        var parts = currentPath.split('/');
+        if ('' !== parts[parts.length - 1]) {
+            parts.pop();
+            currentPath = parts.join('/') + '/';
+        }
+        if (!currentPath.endsWith('/_controller/')) {
+            currentPath += '/_controller/';
+        }
+        KoncertoImpulsus.fetch(currentPath + controllerName + '.js', {
+            source: element
+        }, function(response, source) {
+            source.controller.default = eval('(function(controller) { ' + response.responseText + ' });')(source.controller);
+            KoncertoImpulsus.controllers[controllerName] = source.controller.default;
+            source.controller.default(source.controller);
+        });
+    }
+
+    var controller = {
+        element,
+        targets,
+        default: null,
+        on: function(method, callback) {
+            window.addEventListener('message', function(event) {
+                if ('object' !== typeof event.data) {
+                    return;
+                }
+                if (!('id' in event.data)) {
+                    return;
+                }
+                if (!('controller' in event.data)) {
+                    return;
+                }
+                if (!('method' in event.data)) {
+                    return;
+                }
+                if (method !== event.data.method) {
+                    return;
+                }
+                var element = this.document.querySelector('[data-id=' + event.data.id + ']');
+                element.removeAttribute('data-id');
+                callback(element.controller);
+            });
+        }
+    };
+
+    var actions = element.querySelectorAll('[data-action]');
+    actions.forEach(function (element) {
+        if (!element.hasAttribute('data-bind')) {
+            element.setAttribute('data-bind', 'true');
+            var parts = element.getAttribute('data-action').split('#');
+            var controller = parts[0];
+            parts = controller.split('->');
+            controller = 1 === parts.length ? parts[0] : parts[1];
+            var action = 1 === parts.length ? 'click' : parts[0];
+            element.addEventListener(action, function(event) {
+                var parts = new String(event.target.getAttribute('data-action')).split('#');
+                var controller = parts[0];
+                var method = 1 === parts.length ? 'default' : parts[1];
+                parts = controller.split('->');
+                controller = 1 === parts.length ? parts[0] : parts[1];
+                var element = event.target.closest('[data-controller=' + controller + ']');
+                element.setAttribute('data-id', controller + '-' + (new Date()).getTime());
+                window.postMessage({
+                    id: element.getAttribute('data-id'),
+                    controller,
+                    method
+                });
+            });
+        }
+    });
+
+    return controller;
+}

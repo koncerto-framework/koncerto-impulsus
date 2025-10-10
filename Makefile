@@ -1,0 +1,2 @@
+impulsus:
+	php make.php
