@@ -263,7 +263,7 @@ var KoncertoImpulsus = {
             src = document.currentScript.src;
         } else {
             var script = document.querySelector('script[src$="/' + scriptName + '"');
-            src = script ? script.src : this.location.href;
+            src = script ? script.src : window.location.href;
         }
 
         var parts = new String(src).split('/');
