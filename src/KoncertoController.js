@@ -75,12 +75,17 @@ function KoncertoController(element)
             controller = 1 === parts.length ? parts[0] : parts[1];
             var action = 1 === parts.length ? 'click' : parts[0];
             element.addEventListener(action, function(event) {
-                var parts = new String(event.target.getAttribute('data-action')).split('#');
+                var el = event.target.hasAttribute('data-action') ? event.target : event.target.closes('[data-action]');
+                var parts = new String(el.getAttribute('data-action')).split('#');
                 var controller = parts[0];
                 var method = 1 === parts.length ? 'default' : parts[1];
                 parts = controller.split('->');
                 controller = 1 === parts.length ? parts[0] : parts[1];
-                var element = event.target.closest('[data-controller=' + controller + ']');
+                var element = el.closest('[data-controller=' + controller + ']');
+                if (null === element) {
+                    console.error('Controller ' + controller + ' not found. Please check that target is inside controller.');
+                    return;
+                }
                 element.setAttribute('data-id', controller + '-' + (new Date()).getTime());
                 window.postMessage({
                     id: element.getAttribute('data-id'),
@@ -93,3 +98,5 @@ function KoncertoController(element)
 
     return controller;
 }
+
+window.KoncertoController = KoncertoController;

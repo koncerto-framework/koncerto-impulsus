@@ -274,3 +274,5 @@ var KoncertoImpulsus = {
 };
 
 KoncertoImpulsus.init();
+
+window.KoncertoImpulsus = KoncertoImpulsus;

@@ -54,3 +54,5 @@ function KoncertoFrame(section)
 
     return frame;
 }
+
+window.KoncertoFrame = KoncertoFrame;
