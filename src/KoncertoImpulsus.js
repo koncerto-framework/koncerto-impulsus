@@ -111,6 +111,8 @@ var KoncertoImpulsus = {
                 sections.forEach(function (section) {
                     if (!section.hasAttribute('data-impulsus')) {
                         section.setAttribute('data-impulsus', 'true');
+                    }
+                    if ('false' !== section.getAttribute('data-impulsus')) {
                         section.frame = KoncertoFrame(section);
                     }
                 });
