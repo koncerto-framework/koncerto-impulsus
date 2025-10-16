@@ -17,6 +17,9 @@ function KoncertoFrame(section)
 
     var links = document.querySelectorAll('a[href]');
     links.forEach(function (link) {
+        if (link.href.startsWith('http:') || link.href.startsWith('https:')) {
+            return;
+        }
         if (!link.hasAttribute('data-frame')) {
             link.setAttribute('data-frame', frame.id);
         }
