@@ -19,16 +19,17 @@ function KoncertoController(element)
             element.controller.default(element.controller);
         }, 100);
     } else {
-        var currentPath = new String(location.href);
-        var parts = currentPath.split('/');
-        if ('' !== parts[parts.length - 1]) {
-            parts.pop();
-            currentPath = parts.length > 0 ? parts.join('/') : '';
-        }
-        if (!currentPath.endsWith('/_controller/')) {
-            currentPath += '/_controller/';
-        }
-        KoncertoImpulsus.fetch(currentPath + controllerName + '.js', {
+        // var currentPath = new String(location.href);
+        // var parts = currentPath.split('/');
+        // if ('' !== parts[parts.length - 1]) {
+        //     parts.pop();
+        //     currentPath = parts.length > 0 ? parts.join('/') : '';
+        // }
+        // if (!currentPath.endsWith('/_controller/')) {
+        //     currentPath += '/_controller/';
+        // }
+        var controllerFile = '_controller/' + controllerName + '.js';
+        KoncertoImpulsus.fetch(controllerFile, {
             source: element
         }, function(response, source) {
             var isError = false;
@@ -39,8 +40,8 @@ function KoncertoController(element)
             } catch (e) {
                 isError = true;
             }
-             if (isError || 404 === response.status) {
-                KoncertoImpulsus.fetch(element.getAttribute('data-proxy') + controllerName + '.js', {
+             if ((isError || 404 === response.status) && element.hasAttribute('data-proxy')) {
+                KoncertoImpulsus.fetch(element.getAttribute('data-proxy').replace('%s', controllerFile), {
                     source: element
                 }, function(response, source) {
                     source.controller.default = eval('(function(controller) { ' + response.responseText + ' });')(source.controller);
